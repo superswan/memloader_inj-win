@@ -50,51 +50,6 @@ void PrintErrorWithLineAndExit(const std::string& functionName, const size_t lin
 
     std::exit(-1);
 }
-// Repalced with GetPidByName in proc.cpp
-/* 
-std::pair<DWORD, DWORD> GetTargetProcessAndThreadId(const std::string& windowTitle) {
-
-    DWORD processId{};
-    const auto threadId{ GetWindowThreadProcessId(
-        FindWindowA(nullptr, windowTitle.c_str()),
-        &processId) };
-    if (threadId == 0 || processId == 0) {
-        PrintErrorAndExit("GetWindowThreadProcessId");
-    }
-
-    return std::make_pair(processId, threadId);
-}
-*/
-
-std::string GetInjectedDllPath(const std::string& moduleName) {
-
-    char imageName[MAX_PATH]{};
-    DWORD bytesWritten{ MAX_PATH };
-    auto result{ QueryFullProcessImageNameA(GetCurrentProcess(),
-        0, imageName, &bytesWritten) };
-    if (!result) {
-        PrintErrorAndExit("QueryFullProcessImageNameA");
-    }
-
-    const std::string currentDirectoryPath{ imageName, bytesWritten };
-    const auto fullModulePath{ currentDirectoryPath.substr(
-        0, currentDirectoryPath.find_last_of('\\') + 1)
-        + moduleName };
-
-    return fullModulePath;
-}
-
-HANDLE GetTargetProcessHandle(const DWORD processId) {
-
-    const auto processHandle{ OpenProcess(
-        PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
-        PROCESS_VM_WRITE, false, processId) };
-    if (processHandle == nullptr) {
-        PrintErrorAndExit("OpenProcess");
-    }
-
-    return processHandle;
-}
 
 void* WriteDllFileBytesToProcess(HANDLE processHandle, const std::vector<char>& fileBytes)
 {
@@ -341,20 +296,6 @@ bool IsDllFile(const std::vector<char>& fileBytes) {
     }
     // Check the magic number
     return ntHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC;
-}
-
-std::vector<char> GetDllFileBytes(const std::string& fullModulePath)
-{
-    // Open file in binary mode and get size
-    std::ifstream fileStream(fullModulePath.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-    std::streampos fileSize = fileStream.tellg();
-    fileStream.seekg(0, std::ios::beg);
-
-    // Read the file data into a vector
-    std::vector<char> fileBytes(static_cast<size_t>(fileSize));
-    fileStream.read(&fileBytes[0], fileSize);
-
-    return fileBytes;
 }
 
 // Function to inject by manual mapping

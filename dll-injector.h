@@ -31,13 +31,6 @@ DWORD_PTR PointerToRva(const void* const baseAddress, const void* const offset);
 
 void PrintErrorWithLineAndExit(const std::string& functionName, const size_t line);
 
-//replaced with GetPidByName()
-//std::pair<DWORD, DWORD> GetTargetProcessAndThreadId(const std::string& windowTitle);
-
-std::string GetInjectedDllPath(const std::string& moduleName);
-
-HANDLE GetTargetProcessHandle(const DWORD processId);
-
 void* WriteDllFileBytesToProcess(HANDLE processHandle, const std::vector<char>& fileBytes);
 
 LPVOID GetRemoteModuleFunctionAddress(const std::string& moduleName, const std::string& functionName, DWORD processId);
@@ -47,8 +40,6 @@ void RelocationStub(RelocationStubParameters* parameters);
 std::pair<void*, void*> WriteRelocationStubToTargetProcess(const HANDLE processHandle, const RelocationStubParameters& parameters);
 
 bool IsDllFile(const std::vector<char>& fileBytes);
-
-std::vector<char> GetDllFileBytes(const std::string& fullModulePath);
 
 void InjectByManualMapping(HANDLE hProc, DWORD processId, const std::vector<char>& fileBytes);
 
